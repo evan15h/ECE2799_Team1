@@ -29,8 +29,12 @@ void loop(){
       display alarm on screen
       if(pillboxScanned == false){
         if(RFID sample found)
-          pillbox = true
-          alerting = false
+          pillboxScanned = true
+      }
+      if(pillboxScanned == true){
+        drv.stop()
+        stop display
+        alerting = false
       }
     }
   }
