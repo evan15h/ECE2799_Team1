@@ -1,75 +1,161 @@
-/*
- * This ESP32 code is created by esp32io.com
- *
- * This ESP32 code is released in the public domain
- *
- * For more detail (instruction and wiring diagram), visit https://esp32io.com/tutorials/esp32-multiple-button
- */
+#include "buttons.h"
+#include "display.h"
 
-#include <ezButton.h>
+#define DEBOUNCE_DELAY 80
 
-#define BUTTON_PIN_1 25  // The ESP32 pin GPIO25 connected to the button 1
-#define BUTTON_PIN_2 29  // The ESP32 pin GPIO26 connected to the button 2
-//#define BUTTON_PIN_3 27  // The ESP32 pin GPIO27 connected to the button 3
-//#define BUTTON_PIN_4 14  // The ESP32 pin GPIO14 connected to the button 4
+State currentState = DISPLAY_TIME; // Initial state
 
-ezButton button1(BUTTON_PIN_1);  // create ezButton object for button 1
-ezButton button2(BUTTON_PIN_2);  // create ezButton object for button 2
-//ezButton button3(BUTTON_PIN_3);  // create ezButton object for button 3
-//ezButton button4(BUTTON_PIN_4);  // create ezButton object for button 4
+int setHour = 12;  // Initial alarm hour
+int setMinute = 0; // Initial alarm minute
 
-void setup() {
-  Serial.begin(9600);
-  button1.setDebounceTime(100);  // set debounce time to 100 milliseconds
-  button2.setDebounceTime(100);  // set debounce time to 100 milliseconds
-  //button3.setDebounceTime(100);  // set debounce time to 100 milliseconds
-  //button4.setDebounceTime(100);  // set debounce time to 100 milliseconds
+unsigned long lastButtonPress = 0;
+const int longPressTime = 5000; // Time in milliseconds to count as long press
+
+Alarm alarms[MAX_ALARMS];
+int alarmCount = 0;  // Current number of alarms stored
+
+
+void buttonsSetup() {
+  Serial.begin(115200);
+
+  pinMode(BUTTON_PIN_1, INPUT_PULLUP);
+  pinMode(BUTTON_PIN_2, INPUT_PULLDOWN); 
+
 }
 
-void loop() {
-  button1.loop();  // MUST call the loop() function first
-  button2.loop();  // MUST call the loop() function first
-  //button3.loop();  // MUST call the loop() function first
-  //button4.loop();  // MUST call the loop() function first
+void buttonsLoop() {
+  switch (currentState) {
+    case DISPLAY_TIME:
+      displayTime();
+      if (isButtonOneHeld()) {
+        currentState = SET_HOUR;
+        setHour = rtc.now().hour(); // Start with the current hour
+        display.clearDisplay();
+      }
+      break;
+    case SET_HOUR:
+      displaySetHour();
+      if (readButtonOne()) {
+        setHour = (setHour + 1) % 24; // Increment hour
+        refreshDisplayHour(setHour);  // Update display function to show changes
+      }
+      if (readButtonTwo()) {
+        currentState = SET_MINUTE;
+        setMinute = 0;
+      }
+      break;
+    case SET_MINUTE:
+      displaySetMinute();
+      if (readButtonOne()) {
+        setMinute = (setMinute + 1) % 60; // Increment minute
+        refreshDisplayHour(setMinute); // Update display function to show changes
+      }
+      if (readButtonTwo()) {
+        currentState = CONFIRM_ALARM;
+        storeAlarm(setHour, setMinute);
+        currentState = DISPLAY_TIME; // Return to display time
+      }
+      break;
+  }
+}
 
-  // get button state after debounce
-  int button1_state = button1.getState();  // the state after debounce
-  int button2_state = button2.getState();  // the state after debounce
-  //int button3_state = button3.getState();  // the state after debounce
-  //int button4_state = button4.getState();  // the state after debounce
+bool readButtonOne() {
+  static unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
+  static int buttonState;             // the current reading from the input pin
+  static int lastButtonState = HIGH;   // the previous reading from the input pin
+  int reading = digitalRead(BUTTON_PIN_1);
 
-  /*
-  Serial.print("The button 1 state: ");
-  Serial.println(button1_state);
-  Serial.print("The button 2 state: ");
-  Serial.println(button2_state);
-  Serial.print("The button 3 state: ");
-  Serial.println(button3_state);
-  Serial.print("The button 4 state: ");
-  Serial.println(button4_state);
-  */
+  if (reading != lastButtonState) {
+    lastDebounceTime = millis();
+  }
 
-  if (button1.isPressed())
-    Serial.println("The button 1 is pressed");
+  if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY) {
+    // if the button state has changed:
+    if (reading != buttonState) {
+      buttonState = reading;
+      lastButtonState = reading;
+      if (buttonState == LOW) {
+        return true;
+      }
+    }
+  }
+  lastButtonState = reading;
+  return false;
+}
 
-  if (button1.isReleased())
-    Serial.println("The button 1 is released");
+bool readButtonTwo() {
+  static unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
+  static int buttonState;             // the current reading from the input pin
+  static int lastButtonState = LOW;   // the previous reading from the input pin
+  int reading = digitalRead(BUTTON_PIN_2);
 
-  if (button2.isPressed())
-    Serial.println("The button 2 is pressed");
+  if (reading != lastButtonState) {
+    lastDebounceTime = millis();
+  }
 
-  if (button2.isReleased())
-    Serial.println("The button 2 is released");
+  if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY) {
+    // if the button state has changed:
+    if (reading != buttonState) {
+      buttonState = reading;
+      lastButtonState = reading;
+      if (buttonState == HIGH) {
+        return true;
+      }
+    }
+  }
+  lastButtonState = reading;
+  return false;
+}
 
-  /*if (button3.isPressed())
-    Serial.println("The button 3 is pressed");
+bool isButtonOneHeld() {
+  bool isHeld = false;
+  if (digitalRead(BUTTON_PIN_1) == LOW) {
+    if (millis() - lastButtonPress >= longPressTime) {
+      isHeld = true;
+      lastButtonPress = millis(); // Reset timer to prevent continuous recognition
+    }
+  }
+  return isHeld;
+}
 
-  if (button3.isReleased())
-    Serial.println("The button 3 is released");
+void displaySetHour() {
+  display.clearDisplay();
+  display.setTextSize(3);
+  display.setTextColor(SSD1306_WHITE);
+  int hourX = centerText(String(setHour) + ":" + String(rtc.now().minute()), 3);
+  display.setCursor(hourX, 20);
+  display.println(String(setHour) + ":" + String(rtc.now().minute()));
+  display.display();
+}
 
-  if (button4.isPressed())
-    Serial.println("The button 4 is pressed");
+void displaySetMinute() {
+  display.clearDisplay();
+  display.setTextSize(3);
+  display.setTextColor(SSD1306_WHITE);
+  int minuteX = centerText(String(setHour) + ":" + String(setMinute), 3);
+  display.setCursor(minuteX, 20);
+  display.println(String(setHour) + ":" + String(setMinute));
+  display.display();
+}
 
-  if (button4.isReleased())
-    Serial.println("The button 4 is released");*/
+void storeAlarm(int hour, int minute) {
+  if (alarmCount < MAX_ALARMS) {
+    alarms[alarmCount++] = {hour, minute, true};  // Store new alarm and increment count
+  } else {
+    Serial.println("Alarm list full!");
+  }
+}
+
+void displayAlarms() {
+  for (int i = 0; i < alarmCount; i++) {
+    if (alarms[i].enabled) {
+      Serial.print("Alarm ");
+      Serial.print(i+1);
+      Serial.print(": ");
+      Serial.print(alarms[i].hour);
+      Serial.print(":");
+      Serial.println(alarms[i].minute);
+      // Add more detailed display handling as needed
+    }
+  }
 }
