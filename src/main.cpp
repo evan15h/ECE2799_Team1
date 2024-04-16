@@ -11,6 +11,9 @@ bool alerting = false;
 bool pillboxScanned = false;
 const byte tag1[4] = {0x73, 0xB2, 0x65, 0xFA};
 
+//Declare Functions
+bool checkAlarm (DateTime now, DateTime alarm);
+
 void setup() {
   Serial.begin(115200);
 
@@ -50,6 +53,15 @@ void loop() {
       //ALSO NEED TO TURN OFF DISPLAY FOR POWER SAVING
     }
   }
+
+  if (isButtonOneHeld()){
+    setClock();
+  }
+
+  if (isButtonTwoHeld()){
+    setAlarm();
+  }
+
 }
 
 bool checkAlarm (DateTime now, DateTime alarm){
@@ -59,6 +71,68 @@ bool checkAlarm (DateTime now, DateTime alarm){
   else{
     return false;
   }
+}
+
+void setClock(){    //(NO PARAMETERS BECAUSE USE GLOBAL VARIABLES)
+  DateTime newNow = rtc.now();
+  bool setting = true;
+  int index = 0;  //0 = hour, 1 = minute, 2 = second
+
+  while(setting){
+    displayTime(newNow);
+    if (isButtonOneHeld()){
+      setting = false;
+      display.clearDisplay();
+      //ALSO NEED TO TURN IT OFF
+    }
+    else if (readButtonOne()){
+      if(index < 2)
+        index += 1;
+      else
+        index = 0;
+    }
+    if (readButtonTwo()){
+      if (index = 0)
+        newNow = newNow + TimeSpan(0,1,0,0);
+      if (index = 1)
+        newNow = newNow + TimeSpan(0,0,1,0);
+      if (index = 2)
+        newNow = newNow + TimeSpan(0,0,0,1);
+    }
+  }
+  rtc.adjust(newNow);
+}
+
+void setAlarm(){
+  DateTime newAlarm = alarm1;
+  bool setting = true;
+  int index = 0;  //0 = alarm, 1 = hour, 2 = minute
+  int alarmNum = 1;
+
+  while (setting){
+    displayAlarm(newAlarm, alarmNum);
+    if (isButtonOneHeld()){
+      setting = false;
+      display.clearDisplay();
+      //ALSO NEED TO TURN IT OFF
+    }
+    else if (readButtonOne()){
+      if(index < 2)
+        index += 1;
+      else
+        index = 0;
+    }
+    if (readButtonTwo()){
+      if (index = 0)
+        alarmNum = 1; //Just working on one alarm for now.
+      if (index = 1)
+        newAlarm = newAlarm + TimeSpan(0,1,0,0);
+      if (index = 2)
+        newAlarm = newAlarm + TimeSpan(0,0,1,0);
+    }
+  }
+
+  alarm1 = newAlarm;
 }
 
 /*

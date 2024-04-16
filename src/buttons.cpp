@@ -118,6 +118,17 @@ bool isButtonOneHeld() {
   return isHeld;
 }
 
+bool isButtonTwoHeld() {
+  bool isHeld = false;
+  if (digitalRead(BUTTON_PIN_2) == LOW) {
+    if (millis() - lastButtonPress >= longPressTime) {
+      isHeld = true;
+      lastButtonPress = millis(); // Reset timer to prevent continuous recognition
+    }
+  }
+  return isHeld;
+}
+
 void displaySetHour() {
   display.clearDisplay();
   display.setTextSize(3);

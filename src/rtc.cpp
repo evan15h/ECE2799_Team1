@@ -46,4 +46,20 @@ void rtcLoop() {
   delay(1000); // Wait for a second before updating the time
 }
 
+void displayTime(DateTime now){
+  Serial.print(now.hour(), DEC);
+  Serial.print(':');
+  Serial.print(now.minute(), DEC);
+  Serial.print(':');
+  Serial.print(now.second(), DEC);
+  Serial.println();
+}
 
+void displayAlarm(DateTime alarm, int alarmNum){
+  Serial.print(alarmNum, DEC);
+  Serial.print(' ');
+  Serial.print(alarm.hour(), DEC);
+  Serial.print(':');
+  Serial.print(alarm.minute(), DEC);
+  Serial.print(':');
+}

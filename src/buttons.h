@@ -32,6 +32,7 @@ void buttonsLoop();
 bool readButtonOne();
 bool readButtonTwo();
 bool isButtonOneHeld();
+bool isButtonTwoHeld();
 void displaySetHour();
 void displaySetMinute();
 void storeAlarm(int hour, int minute);
