@@ -1,5 +1,15 @@
 #include <WiFi.h>
 #include <rtc.cpp>
+#include <display.cpp>
+#include <driver.cpp>
+#include <rfid.cpp>
+
+
+//Global alarm variable
+DateTime alarm1;
+bool alerting = false;
+bool pillboxScanned = false;
+const byte tag1[4] = {0x73, 0xB2, 0x65, 0xFA};
 
 void setup() {
   Serial.begin(115200);
@@ -11,11 +21,44 @@ void setup() {
   btStop();
 
   Serial.println("WiFi and Bluetooth are disabled");
+
+  //Setup devices
+  buttonsSetup();
+  displaySetup();
+  driverSetup();
+  rfidSetup();
+  rtcSetup();
+
 }
 
 void loop() {
   // Your code here
+  if (alerting || checkAlarm(rtc.now(), alarm1)){
+    alerting = true;
+    if (memcmp(mfrc522.uid.uidByte, tag1, 4) == 0) {
+      pillboxScanned = true;
+    }
+    if (!pillboxScanned){
+      drv.go();
+      display.clearDisplay();
+      display.println("Alarm 1");
+      display.display();
+    }
+    else{
+      drv.stop();
+      display.clearDisplay();
+      //ALSO NEED TO TURN OFF DISPLAY FOR POWER SAVING
+    }
+  }
+}
 
+bool checkAlarm (DateTime now, DateTime alarm){
+  if(now.hour() == alarm.hour() && now.minute() == alarm.minute()){
+    return true;
+  }
+  else{
+    return false;
+  }
 }
 
 /*
@@ -44,15 +87,6 @@ void loop(){
   }
   if (button2.ispressed()){
     setAlarm()
-  }
-}
-
-bool checkAlarm (DateTime now, DateTime alarm){
-  if(now.hour == alarm.hour && now.minut == alarm.minute){
-    return true;
-  }
-  else{
-    return false;
   }
 }
 

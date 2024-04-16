@@ -9,7 +9,7 @@
 
 RTC_DS1307 rtc;
 
-void setup() {
+void rtcSetup() {
   Serial.begin(115200);
   while (!Serial); // Wait for serial port to connect
 
@@ -27,7 +27,7 @@ void setup() {
   }
 }
 
-void loop() {
+void rtcLoop() {
   DateTime now = rtc.now();
 
   Serial.print(now.year(), DEC);

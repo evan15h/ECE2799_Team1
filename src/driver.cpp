@@ -7,7 +7,7 @@
 
 Adafruit_DRV2605 drv;
 
-void setup() {
+void driverSetup() {
   Serial.begin(115200);
   Serial.println("Initializing the DRV2605 haptic controller");
 
@@ -28,7 +28,7 @@ void setup() {
   drv.setMode(DRV2605_MODE_INTTRIG);
 }
 
-void loop() {
+void driverLoop() {
   Serial.println("Playing effect #1");
   drv.setWaveform(0, 1); // effect 1
   drv.setWaveform(1, 0); // end of waveform sequence
