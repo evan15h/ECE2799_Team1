@@ -24,7 +24,7 @@ void displaySetMinute();
 void displayConfirmRepeat();
 void displayRemoveAlarm();
 void cycleThroughAlarms();
-void removeSelectedAlarm();
+void displayRemoveSelectedAlarm();
 void displayNoAlarms();
 
 #endif

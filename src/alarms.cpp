@@ -62,7 +62,8 @@ void loadAlarmsFromMemory() {
 
 void storeAlarm(int hour, int minute, bool repeatsDaily) {
   if (alarmCount < MAX_ALARMS) {
-    alarms[alarmCount++] = {hour, minute, true, repeatsDaily};  // Store new alarm and increment count
+    alarms[alarmCount] = {hour, minute, true, repeatsDaily};  // Store new alarm and increment count
+    alarmCount++;
     //storeAlarmsToMemory(); // Update EEPROM after adding alarm
   } 
   else {
@@ -112,32 +113,37 @@ void dismissAlarm() {
     DateTime now = rtc.now();
     stopVibrationMotor();
     powerDownRFID();
-    lastDismissTime = rtc.now(); // Store the dismissal time
+    lastDismissTime = now; // Store the dismissal time
     for (int i = 0; i < alarmCount; i++) {
         // Check if the alarm matches the current time and is enabled
-        if (alarms[i].enabled && alarms[i].hour && alarms[i].minute == now.hour() && alarms[i].minute == now.minute()) {
+        if (alarms[i].enabled && alarms[i].hour == now.hour() && alarms[i].minute == now.minute()) {
             if (!alarms[i].repeatsDaily) {
-                alarms[i].enabled = false; // Disable non-repeating alarms that go off
+                // Shift all subsequent alarms forward to fill the gap
+                for (int j = i; j < alarmCount - 1; j++) {
+                    alarms[j] = alarms[j + 1];
+                }
+                alarmCount--; // Decrement the count of active alarms
+                i--; // Adjust index to continue checking correctly
             }
-            // Optionally reset the alarm here if it should repeat daily
+            else{
+                alarms[i].enabled = false; // Temporarily disable daily alarms that go off
+            }
             break; // Stop after handling the relevant alarm
         }
     }
     alarmIsActive = false; // Reset the alarm active flag
-    Serial.println("Alarm dismissed");
     // Code to stop the vibration motor
     // Optionally reset the alarm or mark it as not enabled if it should not repeat
 }
 
-// int countSetAlarms() {
-//     int count = 0;
-//     for (int i = 0; i < alarmCount; i++) {
-//         if (alarms[i].enabled) {
-//             count++;
-//         }
-//     }
-//     return count;
-// }
+void removeSelectedAlarm() {
+    // Logic to remove the selected alarm from your alarms array or list
+    for (int i = selectedAlarmIndex; i < alarmCount - 1; i++) {
+        alarms[i] = alarms[i + 1];  // Shift alarms down in the array
+    }
+    alarms[alarmCount - 1] = Alarm();
+    alarmCount--;  // Decrease the count of alarms
+}
 
 void dailyAlarmReset() {
     DateTime now = rtc.now();

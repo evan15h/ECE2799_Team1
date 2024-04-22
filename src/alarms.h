@@ -7,7 +7,7 @@
 #include "driver.h"
 #include "rfid.h"
 
-#define MAX_ALARMS 5  // Maximum number of alarms
+#define MAX_ALARMS 10  // Maximum number of alarms
 #define EEPROM_SIZE 512  // Define the required EEPROM size
 #define EEPROM_SIGNATURE 0xA501
 #define EEPROM_SIGNATURE_ADDR 0
@@ -31,11 +31,11 @@ void EEPROMSetup();
 void storeAlarmsToMemory();
 void loadAlarmsFromMemory();
 void storeAlarm(int hour, int minute, bool repeatsDaily);
-//void displayAlarms();
+void displayAlarms();
 void clearEEPROM();
 void checkAndTriggerAlarms();
 void dismissAlarm();
-//int countSetAlarms();
+void removeSelectedAlarm();
 void dailyAlarmReset();
 Alarm& currentlySelectedAlarm();
 

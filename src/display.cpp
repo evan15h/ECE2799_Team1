@@ -258,10 +258,17 @@ void displayRemoveAlarm() {
     String minuteStr = currentAlarm.minute < 10 ? "0" + String(currentAlarm.minute) : String(currentAlarm.minute);
     String alarms = String(displayHour) + ":" + minuteStr + ampm;
     display.setTextSize(3);
-    display.setTextColor(SSD1306_WHITE);
     int aX = centerText(alarms, 3);
     display.setCursor(aX, 20);
     display.println(alarms);
+
+    // Show whether the alarm repeats
+    String repeatStatus = currentAlarm.repeatsDaily ? "REPEATS DAILY" : "DOES NOT REPEAT";
+    display.setTextSize(1);
+    int rX = centerText(repeatStatus, 1);
+    int rY = calculateYPosition(1, 20); // Calculate new Y based on previous text
+    display.setCursor(rX, rY);
+    display.println(repeatStatus);
 
     display.display();
 }
@@ -273,11 +280,8 @@ void cycleThroughAlarms() {
     displayRemoveAlarm();
 }
 
-void removeSelectedAlarm() {
-    // Logic to remove the selected alarm from your alarms array or list
-    for (int i = selectedAlarmIndex; i < alarmCount - 1; i++) {
-        alarms[i] = alarms[i + 1];  // Shift alarms down in the array
-    }
+void displayRemoveSelectedAlarm() {
+    alarms[alarmCount - 1] = Alarm();
     alarmCount--;  // Decrease the count of alarms
     display.clearDisplay();
     String alarm = String("ALARM ") + String(selectedAlarmIndex+1);
@@ -288,8 +292,6 @@ void removeSelectedAlarm() {
     display.println(alarm);
 
     String removed = "REMOVED";
-    display.setTextSize(2);
-    display.setTextColor(SSD1306_WHITE);
     int aX = centerText(removed, 2);
     display.setCursor(aX, 37);
     display.println(removed);

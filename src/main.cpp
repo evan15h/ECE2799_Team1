@@ -58,4 +58,5 @@ void loop() {
     checkRFID();
     // Additional logic to decide when to go to sleep again, if needed
     dailyAlarmReset();
+    //displayAlarms();
 }

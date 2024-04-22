@@ -26,14 +26,16 @@ void buttonsLoop() {
         currentState = SET_HOUR;
         setHour = rtc.now().hour(); // Start with the current hour
         display.clearDisplay();
+        delay(500);
       } 
       else if (isButtonTwoHeld()) {  // Long press on button two to remove alarm
         if (alarmCount == 0) {
           displayNoAlarms();
         }
         else{
-          currentState = REMOVE_ALARM;
           display.clearDisplay();
+          currentState = REMOVE_ALARM;
+          delay(500);
         }
       }
       break;
@@ -70,12 +72,10 @@ void buttonsLoop() {
       break;
     case CONFIRM_REPEAT:
       if (readButtonOne()) {  // Button one for YES
-        alarms[selectedAlarmIndex].repeatsDaily = true;
         storeAlarm(setHour, setMinute, true);
         currentState = DISPLAY_TIME;
       }
       if (readButtonTwo()) {  // Button two for NO
-        alarms[selectedAlarmIndex].repeatsDaily = false;
         storeAlarm(setHour, setMinute, false);
         currentState = DISPLAY_TIME;
       }
@@ -91,6 +91,7 @@ void buttonsLoop() {
       } 
       if (readButtonOne()) { // Press button one to confirm removal
         removeSelectedAlarm(); // Function to remove the currently selected alarm
+        displayRemoveSelectedAlarm();
         currentState = DISPLAY_TIME;
       }
       break;
