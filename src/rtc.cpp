@@ -1,41 +1,67 @@
 #include <Wire.h>
-#include <RTClib.h>
+#include "rtc.h"
 
-RTC_PCF8523 rtc; // Create an instance of the RTC_PCF8523 class
+//RTC_PCF8523 rtc; // Create an instance of the RTC_PCF8523 class
 
-void setup() {
+#define DS1307_ADDRESS 0x68 ///< I2C address for DS1307
+#define DS1307_CONTROL 0x07 ///< Control register
+#define DS1307_NVRAM 0x08
+
+RTC_DS1307 rtc;
+DateTime lastDismissTime;
+
+void rtcSetup() {
   Serial.begin(115200);
-  while (!Serial); // Wait for serial port to connect
+  // Wait for serial port to open on native USB devices
+  while (!Serial) {
+    delay(1);
+  }
 
+  // Start the RTC module
   if (!rtc.begin()) {
     Serial.println("Couldn't find RTC");
     while (1);
   }
 
-  if (!rtc.initialized() || rtc.lostPower()) {
-    Serial.println("RTC is NOT initialized, let's set the time!");
-    // When time needs to be set on a new device, or after a power loss, set the date & time
+  // Check if the RTC is running
+  if (!rtc.isrunning()) {
+    Serial.println("RTC is NOT running!");
+    // Following line sets the RTC to the date & time this sketch was compiled
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    // This line sets the RTC with an explicit date & time, for example to set January 1, 2020 at 00:00 you would call:
-    // rtc.adjust(DateTime(2020, 1, 1, 0, 0, 0));
+
+    // Add an estimated delay time, e.g., 27 seconds
+    DateTime now = rtc.now();
+    rtc.adjust(DateTime(now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second() + 27));
   }
+
 }
 
-void loop() {
-  DateTime now = rtc.now();
+// void printTime() {
+//   if (!rtc.isrunning()) {
+//     Serial.println("RTC is NOT running!");
+//     // Set the date and time to compile time
+//     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+//   }
 
-  Serial.print(now.year(), DEC);
-  Serial.print('/');
-  Serial.print(now.month(), DEC);
-  Serial.print('/');
-  Serial.print(now.day(), DEC);
-  Serial.print(" ");
-  Serial.print(now.hour(), DEC);
-  Serial.print(':');
-  Serial.print(now.minute(), DEC);
-  Serial.print(':');
-  Serial.print(now.second(), DEC);
-  Serial.println();
+//   DateTime now = rtc.now();
+//   Serial.print(now.year(), DEC);
+//   Serial.print('/');
+//   printWithLeadingZero(now.month());
+//   Serial.print('/');
+//   printWithLeadingZero(now.day());
+//   Serial.print(" ");
+//   printWithLeadingZero(now.hour());
+//   Serial.print(':');
+//   printWithLeadingZero(now.minute());
+//   Serial.print(':');
+//   printWithLeadingZero(now.second());
+//   Serial.println();
+// }
 
-  delay(1000); // Wait for a second before updating the time
-}
+// // Helper function to print a number with leading zero if it is less than 10
+// void printWithLeadingZero(int num) {
+//   if (num < 10) {
+//     Serial.print('0');
+//   }
+//   Serial.print(num, DEC);
+// }

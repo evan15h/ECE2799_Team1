@@ -1,5 +1,5 @@
 #include <Wire.h>
-#include <Adafruit_DRV2605.h>
+#include "driver.h"
 
 // Define the I2C pins for ESP32
 #define I2C_SDA 21
@@ -7,41 +7,38 @@
 
 Adafruit_DRV2605 drv;
 
-void setup() {
+void driverSetup() {
   Serial.begin(115200);
-  Serial.println("Initializing the DRV2605 haptic controller");
 
-  drv.begin();
-
-  // Explicitly define I2C pins, if necessary
+  // Start I2C communication
   Wire.begin(I2C_SDA, I2C_SCL);
 
-  drv.begin();
-
-  // Set the haptic driver to use the I2C address (if necessary)
-  // drv.begin(&Wire); // Uncomment if you need to explicitly set the I2C address
+  // Initialize the DRV2605 device on the I2C bus
+  if (!drv.begin()) {
+    Serial.println("Could not find DRV2605");
+    while (1) delay(10); // Halt execution if DRV2605 is not found
+  }
 
   // Select a haptic effect library.
-  drv.selectLibrary(1); // 1 for ERM motors
+  drv.selectLibrary(1); // 1 for ERM (Eccentric Rotating Mass) motors
 
   // Set mode to internal trigger
   drv.setMode(DRV2605_MODE_INTTRIG);
 }
 
-void loop() {
-  Serial.println("Playing effect #1");
-  drv.setWaveform(0, 1); // effect 1
-  drv.setWaveform(1, 0); // end of waveform sequence
-  drv.go();
+void playEffect(uint8_t effect) {
+  Serial.println("Playing effect #" + String(effect));
+  drv.setWaveform(0, effect); // Set the effect
+  drv.setWaveform(1, 0);      // End of waveform sequence
+  drv.go();                   // Trigger the effect
+}
 
-  delay(1000);
+void activateVibrationMotor() {
 
-  Serial.println("Playing effect #2");
-  drv.setWaveform(0, 2); // effect 2
-  drv.setWaveform(1, 0); // end of waveform sequence
-  drv.go();
+  playEffect(1); // Play effect #1
+  delay(100);   // Wait for a second
+}
 
-  delay(1000);
-
-  // Add more effects as desired
+void stopVibrationMotor() {
+  drv.stop();
 }
