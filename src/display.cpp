@@ -40,7 +40,6 @@ void displaySetup() {
   
   // Initialize I2C for ESP32
   Wire.begin(I2C_SDA, I2C_SCL);
-
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;);
@@ -48,7 +47,6 @@ void displaySetup() {
 
   display.clearDisplay();
   display.cp437(true);         // Use full 256 char 'Code Page 437' font
-
 }
 
 void displayTime() {
@@ -107,14 +105,14 @@ int centerText(String text, int textSize) {
   return (SCREEN_WIDTH - w) / 2;
 }
 
-std::pair<int, int> centerArrow(String text, int textSize) {
-    int16_t x1, y1;
-    uint16_t w, h;
-    display.setTextSize(textSize);
-    display.getTextBounds(text, 0, 0, &x1, &y1, &w, &h);
-    int centeredX = (SCREEN_WIDTH - w) / 2;
-    return {centeredX, w};  // Return both the centered position and width
-}
+// std::pair<int, int> centerArrow(String text, int textSize) {
+//     int16_t x1, y1;
+//     uint16_t w, h;
+//     display.setTextSize(textSize);
+//     display.getTextBounds(text, 0, 0, &x1, &y1, &w, &h);
+//     int centeredX = (SCREEN_WIDTH - w) / 2;
+//     return {centeredX, w};  // Return both the centered position and width
+// }
 
 int calculateYPosition(int newSize, int previousY) {
   int16_t x1, y1;
@@ -124,13 +122,13 @@ int calculateYPosition(int newSize, int previousY) {
   return previousY + h + 18;  // Add some padding
 }
 
-uint16_t strWidth(const String& str, int textSize) {
-    int16_t x1, y1;
-    uint16_t w, h;
-    display.setTextSize(textSize);
-    display.getTextBounds(str, 0, 0, &x1, &y1, &w, &h);
-    return w;
-}
+// uint16_t strWidth(const String& str, int textSize) {
+//     int16_t x1, y1;
+//     uint16_t w, h;
+//     display.setTextSize(textSize);
+//     display.getTextBounds(str, 0, 0, &x1, &y1, &w, &h);
+//     return w;
+// }
 
 void displaySetHour() {
   DateTime now = rtc.now();
@@ -138,7 +136,7 @@ void displaySetHour() {
   display.setTextSize(3);
   display.setTextColor(SSD1306_WHITE);
 
-  int displayHour = setHour;
+  uint8_t displayHour = setHour;
   String ampm = "AM";
 
   // Convert to 12-hour format for display
@@ -176,7 +174,7 @@ void displaySetMinute() {
   display.setTextSize(3);
   display.setTextColor(SSD1306_WHITE);
 
-  int displayHour = setHour;
+  uint8_t displayHour = setHour;
   String ampm = "AM";
 
   // Convert to 12-hour format for display
@@ -281,8 +279,6 @@ void cycleThroughAlarms() {
 }
 
 void displayRemoveSelectedAlarm() {
-    alarms[alarmCount - 1] = Alarm();
-    alarmCount--;  // Decrease the count of alarms
     display.clearDisplay();
     String alarm = String("ALARM ") + String(selectedAlarmIndex+1);
     display.setTextSize(2);
@@ -315,4 +311,9 @@ void displayNoAlarms() {
   display.println(none1);
   display.display();
   delay(2000); // Display message for 2 seconds
+}
+
+void turnOffDisplay() {
+    display.clearDisplay();
+    display.display();
 }

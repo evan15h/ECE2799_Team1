@@ -29,9 +29,9 @@ void rtcSetup() {
     // Following line sets the RTC to the date & time this sketch was compiled
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 
-    // Add an estimated delay time, e.g., 27 seconds
+    // Add an estimated delay time, e.g., 30 seconds
     DateTime now = rtc.now();
-    rtc.adjust(DateTime(now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second() + 27));
+    rtc.adjust(DateTime(now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second() + 30));
   }
 
 }

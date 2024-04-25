@@ -4,8 +4,10 @@
 
 State currentState = DISPLAY_TIME; // Initial state
 
-int setHour = 12;  // Initial alarm hour
-int setMinute = 0; // Initial alarm minute
+uint8_t setHour = 12;  // Initial alarm hour
+uint8_t setMinute = 0; // Initial alarm minute
+unsigned long lastUserActivityTime = 0;
+const unsigned long userInactivityLimit = 10000; // 15 seconds of inactivity allowed
 
 unsigned long lastButtonPress = 0;
 
@@ -22,11 +24,19 @@ void buttonsLoop() {
   switch (currentState) {
     case DISPLAY_TIME:
       displayTime();
+      // if (readButtonOne()) {
+      //   lastUserActivityTime = millis(); // Update activity time
+      //   Serial.println("User active!");
+      // }
+      // if (readButtonTwo()) {
+      //   lastUserActivityTime = millis(); // Update activity time
+      //   Serial.println("User active!");
+      // }
       if (isButtonOneHeld()) {
         currentState = SET_HOUR;
         setHour = rtc.now().hour(); // Start with the current hour
         display.clearDisplay();
-        delay(500);
+        delay(750);
       } 
       else if (isButtonTwoHeld()) {  // Long press on button two to remove alarm
         if (alarmCount == 0) {
@@ -114,6 +124,8 @@ bool readButtonOne() {
       buttonState = reading;
       lastButtonState = reading;
       if (buttonState == LOW) {
+        lastUserActivityTime = millis(); // Update activity time
+        Serial.println("User active!");
         return true;
       }
     }
@@ -138,6 +150,8 @@ bool readButtonTwo() {
       buttonState = reading;
       lastButtonState = reading;
       if (buttonState == HIGH) {
+        lastUserActivityTime = millis(); // Update activity time
+        Serial.println("User active!");
         return true;
       }
     }
@@ -165,6 +179,8 @@ bool isButtonOneHeld() {
         // Only report true once, and only after the button is held down long enough
         if (isButtonPressed) {
           isButtonPressed = false;  // Prevent repeated triggers
+          lastUserActivityTime = millis(); // Update activity time
+          Serial.println("User active!");
           return true;
         }
       }
@@ -196,6 +212,8 @@ bool isButtonTwoHeld() {
         // Only report true once, and only after the button is held down long enough
         if (isButtonPressed) {
           isButtonPressed = false;  // Prevent repeated triggers
+          lastUserActivityTime = millis(); // Update activity time
+          Serial.println("User active!");
           return true;
         }
       }

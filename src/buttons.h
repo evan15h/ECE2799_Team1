@@ -10,7 +10,7 @@
 #define BUTTON_PIN_2 4
 
 #define DEBOUNCE_DELAY 75
-#define LONG_PRESS_TIME 1000
+#define LONG_PRESS_TIME 850
 
 // Define states for the UI
 enum State {
@@ -23,8 +23,10 @@ enum State {
 };
 
 extern State currentState;
-extern int setHour;
-extern int setMinute;
+extern uint8_t setHour;
+extern uint8_t setMinute;
+extern unsigned long lastUserActivityTime;
+extern const unsigned long userInactivityLimit; // 15 seconds of inactivity allowed
 
 // Function declarations
 void buttonsSetup();

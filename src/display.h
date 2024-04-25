@@ -16,9 +16,9 @@ extern RTC_DS1307 rtc;
 void displaySetup();
 void displayTime();
 int centerText(String text, int textSize);
-std::pair<int, int> centerArrow(String text, int textSize);
+//std::pair<int, int> centerArrow(String text, int textSize);
 int calculateYPosition(int newSize, int previousY);
-uint16_t strWidth(const String& str, int textSize);
+//uint16_t strWidth(const String& str, int textSize);
 void displaySetHour();
 void displaySetMinute();
 void displayConfirmRepeat();
@@ -26,5 +26,6 @@ void displayRemoveAlarm();
 void cycleThroughAlarms();
 void displayRemoveSelectedAlarm();
 void displayNoAlarms();
+void turnOffDisplay();
 
 #endif
