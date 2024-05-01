@@ -7,7 +7,7 @@
 #define DS1307_CONTROL 0x07 ///< Control register
 #define DS1307_NVRAM 0x08
 
-RTC_DS1307 rtc;
+RTC_PCF8523 rtc;
 DateTime lastDismissTime;
 
 void rtcSetup() {
@@ -31,37 +31,7 @@ void rtcSetup() {
 
     // Add an estimated delay time, e.g., 30 seconds
     DateTime now = rtc.now();
-    rtc.adjust(DateTime(now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second() + 30));
+    rtc.adjust(DateTime(now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second() + 28));
   }
 
 }
-
-// void printTime() {
-//   if (!rtc.isrunning()) {
-//     Serial.println("RTC is NOT running!");
-//     // Set the date and time to compile time
-//     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-//   }
-
-//   DateTime now = rtc.now();
-//   Serial.print(now.year(), DEC);
-//   Serial.print('/');
-//   printWithLeadingZero(now.month());
-//   Serial.print('/');
-//   printWithLeadingZero(now.day());
-//   Serial.print(" ");
-//   printWithLeadingZero(now.hour());
-//   Serial.print(':');
-//   printWithLeadingZero(now.minute());
-//   Serial.print(':');
-//   printWithLeadingZero(now.second());
-//   Serial.println();
-// }
-
-// // Helper function to print a number with leading zero if it is less than 10
-// void printWithLeadingZero(int num) {
-//   if (num < 10) {
-//     Serial.print('0');
-//   }
-//   Serial.print(num, DEC);
-// }

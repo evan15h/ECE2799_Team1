@@ -1,6 +1,7 @@
 #include "buttons.h"
 #include "display.h"
 #include "alarms.h"
+#include "rtc.h"
 
 State currentState = DISPLAY_TIME; // Initial state
 

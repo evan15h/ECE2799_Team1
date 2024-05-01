@@ -5,7 +5,7 @@
 #include <RTClib.h>
 
 // Declare the display object and functions
-extern RTC_DS1307 rtc;
+extern RTC_PCF8523 rtc;
 extern DateTime lastDismissTime;
 
 void rtcSetup();

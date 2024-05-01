@@ -11,7 +11,6 @@
 
 // Declare the display object and functions
 extern Adafruit_SSD1306 display;
-extern RTC_DS1307 rtc;
 
 void displaySetup();
 void displayTime();

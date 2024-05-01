@@ -6,6 +6,7 @@
 #include "display.h"
 #include "driver.h"
 #include "rfid.h"
+#include "rtc.h"
 
 #define MAX_ALARMS 10  // Maximum number of alarms
 #define EEPROM_SIZE 512  // Define the required EEPROM size
